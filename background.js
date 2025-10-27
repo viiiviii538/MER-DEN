@@ -41,55 +41,47 @@ const MAX_ITEMS_PER_RUN = 30;
 let processedThisRun = 0;
 
 // -------- キュー（同時1タスク・安全実装） --------
-let enqueue;
-let __resetQueue;
-let __setEnqueueImplementation;
+const queueState = {
+    items: [],
+    running: false
+};
 
-if (typeof module !== 'undefined' && module.exports) {
-    ({ enqueue, __resetQueue, __setEnqueueImplementation } = require('./src/background/queue'));
-} else {
-    const queueState = {
-        items: [],
-        running: false
-    };
-
-    async function pump() {
-        if (queueState.running) return;
-        const next = queueState.items.shift();
-        if (!next) return;
-        queueState.running = true;
-        try {
-            const val = await next.task();
-            next.resolve(val);
-        } catch (e) {
-            next.resolve(null);
-        } finally {
-            queueState.running = false;
-            if (queueState.items.length) pump();
-        }
-    }
-
-    function realEnqueue(task) {
-        return new Promise((resolve) => {
-            queueState.items.push({ task, resolve });
-            pump();
-        });
-    }
-
-    let enqueueImpl = realEnqueue;
-
-    enqueue = function enqueue(task) {
-        return enqueueImpl(task);
-    };
-
-    __resetQueue = function __resetQueue() {
-        queueState.items.length = 0;
+async function pump() {
+    if (queueState.running) return;
+    const next = queueState.items.shift();
+    if (!next) return;
+    queueState.running = true;
+    try {
+        const val = await next.task();
+        next.resolve(val);
+    } catch (e) {
+        next.resolve(null);
+    } finally {
         queueState.running = false;
-    };
+        if (queueState.items.length) pump();
+    }
+}
 
-    __setEnqueueImplementation = function __setEnqueueImplementation(fn) {
-        enqueueImpl = (typeof fn === 'function') ? fn : realEnqueue;
-    };
+function realEnqueue(task) {
+    return new Promise((resolve) => {
+        queueState.items.push({ task, resolve });
+        pump();
+    });
+}
+
+let enqueueImpl = realEnqueue;
+
+function enqueue(task) {
+    return enqueueImpl(task);
+}
+
+function __resetQueue() {
+    queueState.items.length = 0;
+    queueState.running = false;
+}
+
+function __setEnqueueImplementation(fn) {
+    enqueueImpl = (typeof fn === 'function') ? fn : realEnqueue;
 }
 
 // -------- タブ読み込み待ち（status:complete まで） --------
