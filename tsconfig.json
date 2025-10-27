@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es2021",
+    "lib": ["es2021", "dom"],
+    "types": ["chrome", "jest", "node"]
+  },
+  "include": [
+    "*.js",
+    "tests/**/*.js"
+  ]
+}

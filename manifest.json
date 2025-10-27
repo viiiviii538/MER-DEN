@@ -1,0 +1,39 @@
+{
+    "manifest_version": 3,
+    "name": "MerSearch Helper",
+    "version": "1.2.2",
+    "description": "メルカリ検索結果に♥いいね数を表示",
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "permissions": [
+        "tabs",
+        "scripting",
+        "storage",
+        "alarms"
+    ],
+    "host_permissions": [
+        "https://jp.mercari.com/*",
+        "https://www.mercari.com/jp/*",
+        "https://script.google.com/*",
+        "https://script.googleusercontent.com/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://jp.mercari.com/*"
+            ],
+            "js": [
+                "content-metrics.js",
+                "content.js"
+            ],
+            "css": [
+                "overlay.css"
+            ],
+            "run_at": "document_idle"
+        }
+    ]
+}
