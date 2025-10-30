@@ -67,6 +67,8 @@ describe('content.js', () => {
       restoreRandom();
       restoreRandom = undefined;
     }
+    const randomFn = /** @type {{ mockRestore?: () => void }} */ (Math.random);
+    if (randomFn.mockRestore) randomFn.mockRestore();
     delete global.chrome;
   });
 
