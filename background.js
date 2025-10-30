@@ -125,7 +125,7 @@ async function scrapeLikeFromDomOnce(url) {
                 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
                 const read = () => {
                     const root =
-                        document.querySelector('[data-testid="icon-heart-button"]') ||
+                        document.querySelector(String.raw`[data-testid="icon-heart-button"]`) ||
                         document.querySelector('button[aria-label*="いいね"], button[aria-label*="Like"]');
 
                     if (!root) return null;
