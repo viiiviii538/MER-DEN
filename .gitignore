@@ -7,3 +7,4 @@ test-results/
 *.mp4
 *.zip
 *.trace
+node_modules

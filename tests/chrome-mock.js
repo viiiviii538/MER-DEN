@@ -46,19 +46,19 @@ function createChromeMock(overrides = {}) {
       remove: jest.fn().mockResolvedValue(undefined)
     },
     scripting: {
-      executeScript: jest.fn().mockResolvedValue([]),
+      executeScript: jest.fn().mockResolvedValue([])
     },
     storage: {
       local: {
         get: jest.fn().mockResolvedValue({}),
-        set: jest.fn().mockResolvedValue(undefined),
-      },
+        set: jest.fn().mockResolvedValue(undefined)
+      }
     },
     alarms: {
       create: jest.fn(),
       clear: jest.fn().mockResolvedValue(true),
-      onAlarm: alarmsOnAlarm.api,
-    },
+      onAlarm: alarmsOnAlarm.api
+    }
   };
 
   const chrome = {
@@ -82,7 +82,7 @@ function createChromeMock(overrides = {}) {
     chrome,
     runtimeOnMessage,
     tabsOnUpdated,
-    alarmsOnAlarm,
+    alarmsOnAlarm
   };
 }
 

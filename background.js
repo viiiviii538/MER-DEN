@@ -30,7 +30,7 @@ const killSwitchState = {
     lastChecked: 0,
     lastSuccess: 0,
     consecutiveFailures: 0,
-    pending: null,
+    pending: null
 };
 
 /** @type {Map<string, number>} */
@@ -229,7 +229,7 @@ function withTimeout(promise, ms) {
     if (!Number.isFinite(ms) || ms <= 0) return promise;
     return Promise.race([
         promise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
     ]);
 }
 
@@ -242,7 +242,7 @@ async function readKillSwitchCache() {
             return {
                 enabled: Boolean(value.enabled),
                 lastChecked: Number(value.lastChecked) || 0,
-                lastSuccess: Number(value.lastSuccess) || 0,
+                lastSuccess: Number(value.lastSuccess) || 0
             };
         }
     } catch (e) {
@@ -258,8 +258,8 @@ async function writeKillSwitchCache(enabled) {
             [KILL_SWITCH_STORAGE_KEY]: {
                 enabled,
                 lastChecked: killSwitchState.lastChecked,
-                lastSuccess: killSwitchState.lastSuccess,
-            },
+                lastSuccess: killSwitchState.lastSuccess
+            }
         });
     } catch (e) {
         if (DEBUG) console.debug('[bg] writeKillSwitchCache error', e);
@@ -284,7 +284,7 @@ function updateKillSwitchState({ enabled, ok }) {
         enabled: killSwitchState.enabled,
         lastChecked: killSwitchState.lastChecked,
         lastSuccess: killSwitchState.lastSuccess,
-        source: ok ? 'remote' : 'error',
+        source: ok ? 'remote' : 'error'
     };
 }
 
@@ -318,7 +318,7 @@ async function ensureKillSwitchFresh({ force = false } = {}) {
             enabled: killSwitchState.enabled,
             lastChecked: killSwitchState.lastChecked,
             lastSuccess: killSwitchState.lastSuccess,
-            source: 'memory',
+            source: 'memory'
         };
     }
     if (!killSwitchState.pending) {
@@ -339,7 +339,7 @@ async function ensureKillSwitchFresh({ force = false } = {}) {
             enabled: killSwitchState.enabled,
             lastChecked: killSwitchState.lastChecked,
             lastSuccess: killSwitchState.lastSuccess,
-            source: 'error',
+            source: 'error'
         };
     }
 }
@@ -359,7 +359,7 @@ function scheduleKillSwitchRefresh() {
     try {
         chrome.alarms.create('merHelper.killSwitchRefresh', {
             periodInMinutes: Math.max(1, KILL_SWITCH_REFRESH_MINUTES),
-            delayInMinutes: 0.2,
+            delayInMinutes: 0.2
         });
         chrome.alarms.onAlarm.addListener((alarm) => {
             if (alarm?.name === 'merHelper.killSwitchRefresh') {
@@ -405,13 +405,13 @@ async function postVisitLog(entry) {
         type: 'log-visit',
         entry: {
             ...entry,
-            loggedAt: entry.loggedAt || new Date().toISOString(),
-        },
+            loggedAt: entry.loggedAt || new Date().toISOString()
+        }
     };
     const res = await withTimeout(fetch(GAS_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload)
     }), GAS_FETCH_TIMEOUT_MS);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json().catch(() => ({}));
@@ -498,6 +498,6 @@ if (typeof module !== 'undefined' && module.exports) {
         },
         __clearRecentLogCache() {
             recentLogCache.clear();
-        },
+        }
     };
 }

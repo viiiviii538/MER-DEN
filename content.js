@@ -332,12 +332,12 @@ const merHelperContentGlobal = typeof self !== 'undefined'
       try {
         const el = document.querySelector(sel);
         if (!el) continue;
-        const value = metrics.findPrice(/** @type {HTMLElement} */ (el));
+        const value = metrics.findPrice(/** @type {HTMLElement} */(el));
         if (Number.isFinite(value)) return value;
       } catch { }
     }
     try {
-      const fallback = metrics.findPrice(/** @type {HTMLElement} */ (document.body));
+      const fallback = metrics.findPrice(/** @type {HTMLElement} */(document.body));
       if (Number.isFinite(fallback)) return fallback;
     } catch { }
     return null;
@@ -346,7 +346,7 @@ const merHelperContentGlobal = typeof self !== 'undefined'
   function normalizeDateText(value = '') {
     return value
       .replace(/[年月]/g, '/')
-      .replace(/[\.]/g, '/')
+      .replace(/[.]/g, '/')
       .replace(/日/g, '')
       .replace(/：/g, ':')
       .replace(/\s+/g, ' ')
@@ -364,7 +364,7 @@ const merHelperContentGlobal = typeof self !== 'undefined'
       }
     }
     const text = (document.body?.innerText || '').slice(0, 2000);
-    const pattern = /(20\d{2})[\/\.年-]?\s*(\d{1,2})[\/\.月-]?\s*(\d{1,2})(?:\s*(\d{1,2}[:：]\d{2}))?/;
+    const pattern = /(20\d{2})[/.年-]?\s*(\d{1,2})[/.月-]?\s*(\d{1,2})(?:\s*(\d{1,2}[:：]\d{2}))?/;
     const match = text.match(pattern);
     if (match) {
       const [, y, m, d, hm] = match;
