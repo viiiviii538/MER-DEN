@@ -36,10 +36,10 @@ const merHelperContentGlobal = typeof self !== 'undefined'
 
   // 検索結果のカード内「詳細ページへのリンク」
   const ITEM_SELECTORS = [
-    'a[href^="/item/"]',
-    'li a[href^="/item/"]',
-    'a[href*="://jp.mercari.com/item/"]',
-    'li a[href*="://jp.mercari.com/item/"]'
+    String.raw`a[href^="/item/"]`,
+    String.raw`li a[href^="/item/"]`,
+    String.raw`a[href*="://jp.mercari.com/item/"]`,
+    String.raw`li a[href*="://jp.mercari.com/item/"]`
   ];
 
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -321,7 +321,7 @@ const merHelperContentGlobal = typeof self !== 'undefined'
 
   function extractItemId() {
     const candidates = [getLocationHref(), getLocationPathname()];
-    const anchor = document.querySelector('a[href*="/item/"]');
+    const anchor = document.querySelector(String.raw`a[href*="/item/"]`);
     if (anchor) candidates.push(anchor.getAttribute('href') || '');
     for (const value of candidates) {
       const match = value && value.match(/m[0-9A-Za-z]+/);
@@ -332,13 +332,13 @@ const merHelperContentGlobal = typeof self !== 'undefined'
 
   function extractPriceCandidate() {
     const selectors = [
-      '[data-testid="transaction-price"]',
-      '[data-testid="price-box"]',
-      '[data-testid="item-price"]',
+      String.raw`[data-testid="transaction-price"]`,
+      String.raw`[data-testid="price-box"]`,
+      String.raw`[data-testid="item-price"]`,
       '.transaction-price',
       '.merPrice',
       '.price',
-      'meta[itemprop="price"]'
+      String.raw`meta[itemprop="price"]`
     ];
     for (const sel of selectors) {
       try {
@@ -393,8 +393,8 @@ const merHelperContentGlobal = typeof self !== 'undefined'
     const itemId = extractItemId();
     if (itemId) entry.itemId = itemId;
     const title = readFirstText([
-      '[data-testid="item-name"]',
-      '[data-testid="transaction-item-name"]',
+      String.raw`[data-testid="item-name"]`,
+      String.raw`[data-testid="transaction-item-name"]`,
       'h1',
       'h2',
       '.mer-item-name'

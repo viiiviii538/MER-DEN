@@ -38,7 +38,7 @@ function createMetrics() {
   const PRICE_PATTERN = /[¥￥]\s*([0-9]{1,3}(?:,[0-9]{3})*|[0-9]+)/;
   const PRICE_FALLBACK_PATTERN = /([0-9]{1,3}(?:,[0-9]{3})*|[0-9]+)\s*円/;
   const SOLD_TEXT_PATTERN = /sold|売り切れ/i;
-  const SOLD_ALT_SELECTOR = '[aria-label*="SOLD"],[alt*="SOLD"],[aria-label*="売り切れ"],[alt*="売り切れ"]';
+  const SOLD_ALT_SELECTOR = String.raw`[aria-label*="SOLD"],[alt*="SOLD"],[aria-label*="売り切れ"],[alt*="売り切れ"]`;
 
   /**
    * @param {string | null | undefined} [value]
