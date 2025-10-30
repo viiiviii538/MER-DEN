@@ -61,7 +61,8 @@ describe('content.js', () => {
   afterEach(() => {
     jest.clearAllTimers();
     jest.useRealTimers();
-    if (Math.random.mockRestore) Math.random.mockRestore();
+    const randomFn = /** @type {{ mockRestore?: () => void }} */ (Math.random);
+    if (randomFn.mockRestore) randomFn.mockRestore();
     delete global.chrome;
   });
 
@@ -191,7 +192,7 @@ describe('content.js', () => {
       url: expect.stringContaining('/transaction/xyz123'),
       pageType: 'transaction-detail',
       title: expect.stringContaining('サンプル'),
-      price: 1200,
+      price: 1200
     }));
     if (logEntries[0].soldAt) {
       expect(logEntries[0].soldAt).toEqual(expect.stringContaining('2024'));

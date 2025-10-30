@@ -40,6 +40,7 @@ function createChromeMock(overrides = {}) {
       onMessage: runtimeOnMessage.api
     },
     tabs: {
+      query: jest.fn().mockResolvedValue([]),
       sendMessage: jest.fn().mockResolvedValue(undefined),
       onUpdated: tabsOnUpdated.api,
       create: jest.fn().mockResolvedValue({}),
