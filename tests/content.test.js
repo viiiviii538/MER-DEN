@@ -3,6 +3,7 @@
  */
 
 const { createChromeMock } = require('./chrome-mock');
+const { stubRandom } = require('./helpers/stubRandom');
 
 const createMetricsMock = () => ({
   findPrice: jest.fn((el) => {
@@ -26,11 +27,12 @@ async function flushTimers(iterations = 8) {
 describe('content.js', () => {
   let chromeMock;
   let logEntries;
+  let restoreRandom;
 
   beforeEach(() => {
     jest.resetModules();
     jest.useFakeTimers();
-    jest.spyOn(Math, 'random').mockReturnValue(0);
+    restoreRandom = stubRandom(0);
     chromeMock = createChromeMock();
     logEntries = [];
     chromeMock.chrome.runtime.sendMessage.mockImplementation((message) => {
@@ -61,7 +63,10 @@ describe('content.js', () => {
   afterEach(() => {
     jest.clearAllTimers();
     jest.useRealTimers();
-    if (Math.random.mockRestore) Math.random.mockRestore();
+    if (restoreRandom) {
+      restoreRandom();
+      restoreRandom = undefined;
+    }
     delete global.chrome;
   });
 
@@ -191,7 +196,7 @@ describe('content.js', () => {
       url: expect.stringContaining('/transaction/xyz123'),
       pageType: 'transaction-detail',
       title: expect.stringContaining('サンプル'),
-      price: 1200,
+      price: 1200
     }));
     if (logEntries[0].soldAt) {
       expect(logEntries[0].soldAt).toEqual(expect.stringContaining('2024'));

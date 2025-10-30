@@ -76,6 +76,7 @@ function createChromeMock(overrides = {}) {
   chrome.tabs.onUpdated = overrides.tabs?.onUpdated || tabsOnUpdated.api;
   chrome.alarms.onAlarm = overrides.alarms?.onAlarm || alarmsOnAlarm.api;
 
+  // @ts-expect-error - test helper only mocks the subset of the Chrome API that is required by the tests
   global.chrome = chrome;
 
   return {

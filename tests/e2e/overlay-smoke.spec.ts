@@ -1,5 +1,6 @@
 import path from 'path';
 import { expect, test } from '@playwright/test';
+import { stubRandom } from '../helpers/stubRandom';
 
 test.describe('MerSearch Helper overlay smoke test', () => {
   test('displays overlay metrics and like badges without binary artifacts', async ({ playwright }, testInfo) => {
@@ -118,6 +119,8 @@ test.describe('MerSearch Helper overlay smoke test', () => {
       });
     };
 
+    const stubRandomSource = `(${stubRandom.toString()})`;
+
     try {
       await context.route('https://script.google.com/**', async (route) => {
         await route.fulfill({
@@ -155,7 +158,7 @@ test.describe('MerSearch Helper overlay smoke test', () => {
       });
 
       const page = context.pages()[0] ?? (await context.waitForEvent('page'));
-      await page.addInitScript(() => {
+      await page.addInitScript(({ randomValues, stubSource }) => {
         const fixedNow = 1_700_000_000_000;
         const OriginalDate = Date;
         function MockDate(this: Date, ...args: ConstructorParameters<typeof Date>) {
@@ -179,20 +182,15 @@ test.describe('MerSearch Helper overlay smoke test', () => {
           writable: true,
           value: () => fixedNow,
         });
-        const randomValues = [0.19, 0.23, 0.41, 0.59];
-        let randomIndex = 0;
-        Math.random = () => {
-          const value = randomValues[randomIndex % randomValues.length];
-          randomIndex += 1;
-          return value;
-        };
+        const stub = (0, eval)(stubSource) as typeof stubRandom;
+        stub(randomValues);
         let perfCalls = 0;
         Object.defineProperty(performance, 'now', {
           configurable: true,
           writable: true,
           value: () => 500 + perfCalls++ * 7,
         });
-      });
+      }, { randomValues: [0.19, 0.23, 0.41, 0.59], stubSource: stubRandomSource });
       page.on('console', (msg) => {
         consoleLogs.push({ type: msg.type(), text: msg.text() });
       });
