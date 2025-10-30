@@ -2,6 +2,9 @@
 
 /** @typedef {import('./content-metrics.js')} MerHelperMetrics */
 /** @typedef {typeof globalThis & { MerHelperMetrics?: MerHelperMetrics }} MerHelperGlobal */
+/** @typedef {import('./tests/types/chrome').MerHelperKillSwitchStatus} MerHelperKillSwitchStatus */
+/** @typedef {import('./tests/types/chrome').MerHelperLogEntry} MerHelperLogEntry */
+/** @typedef {import('./tests/types/chrome').MerHelperPageType} MerHelperPageType */
 
 /** @type {MerHelperGlobal} */
 const merHelperContentGlobal = typeof self !== 'undefined'
@@ -63,8 +66,13 @@ const merHelperContentGlobal = typeof self !== 'undefined'
     for (let i = 0; i < attempts; i++) {
       try {
         const res = await chrome.runtime.sendMessage({ scope: 'mer-helper', type: 'getKillSwitchStatus', force });
-        if (res?.ok && res.result) {
-          return { enabled: Boolean(res.result.enabled), raw: res.result };
+        if (!res?.ok) {
+          continue;
+        }
+        const result = res.result;
+        if (result && typeof result === 'object' && 'enabled' in result) {
+          const status = /** @type {MerHelperKillSwitchStatus} */ (result);
+          return { enabled: Boolean(status.enabled), raw: status };
         }
       } catch (error) {
         if (DEBUG) console.debug('[MerSearch] kill switch request failed', error);
@@ -280,6 +288,10 @@ const merHelperContentGlobal = typeof self !== 'undefined'
   let lastLoggedSignature = null;
   let lastObservedHref = getLocationHref();
 
+  /**
+   * @param {string} pathname
+   * @returns {MerHelperPageType | null}
+   */
   function detectLogPageType(pathname) {
     if (!pathname) return null;
     if (/^\/mypage\/sold/.test(pathname)) return 'mypage-sold';
@@ -373,10 +385,11 @@ const merHelperContentGlobal = typeof self !== 'undefined'
     return null;
   }
 
+  /** @returns {MerHelperLogEntry | null} */
   function collectTransactionLogData() {
     const pageType = detectLogPageType(getLocationPathname());
     if (!pageType) return null;
-    const entry = { url: getLocationHref(), pageType };
+    const entry = /** @type {MerHelperLogEntry} */ ({ url: getLocationHref(), pageType });
     const itemId = extractItemId();
     if (itemId) entry.itemId = itemId;
     const title = readFirstText([

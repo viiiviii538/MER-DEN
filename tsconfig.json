@@ -7,10 +7,11 @@
     "moduleResolution": "node",
     "target": "es2021",
     "lib": ["es2021", "dom"],
-    "types": ["chrome", "jest", "node"]
+    "types": ["jest", "node"]
   },
   "include": [
     "*.js",
-    "tests/**/*.js"
+    "tests/**/*.js",
+    "tests/**/*.d.ts"
   ]
 }
