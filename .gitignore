@@ -1,2 +1,9 @@
-dist.zip
-node_modules/
+# E2E artifacts（PRに含めない）
+playwright-report/
+test-results/
+.artifacts/
+*.png
+*.webm
+*.mp4
+*.zip
+*.trace
