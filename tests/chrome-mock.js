@@ -213,7 +213,7 @@ function createChromeMock(overrides = {}) {
   chrome.tabs.onUpdated = overrides.tabs?.onUpdated || tabsOnUpdated.api;
   chrome.alarms.onAlarm = overrides.alarms?.onAlarm || alarmsOnAlarm.api;
 
-  // @ts-expect-error - test helper only mocks the subset of the Chrome API that is required by the tests
+  // @ts-ignore - 型定義に存在しないプロパティを後から差し込むための一時的な対応です
   global.chrome = chrome;
 
   return {

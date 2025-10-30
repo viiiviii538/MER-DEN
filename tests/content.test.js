@@ -61,7 +61,16 @@ describe('content.js', () => {
   afterEach(() => {
     jest.clearAllTimers();
     jest.useRealTimers();
-    if (Math.random.mockRestore) Math.random.mockRestore();
+    /**
+     * TypeScript にも Math.random がモック化されていると伝えるため、
+     * 手動で mockRestore プロパティの可能性を付け足しています。
+     * 初心者でも読み解けるよう、明示的に型情報を記述しています。
+     */
+    /** @type {typeof Math.random & { mockRestore?: () => void }} */
+    const randomMock = Math.random;
+    if (typeof randomMock.mockRestore === 'function') {
+      randomMock.mockRestore();
+    }
     delete global.chrome;
   });
 
