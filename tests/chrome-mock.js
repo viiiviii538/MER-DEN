@@ -1,5 +1,5 @@
 // @ts-check
-/// <reference path="./types/chrome.d.ts" />
+/// <reference path="./types/chrome.d.ts"/>
 
 /**
  * @template {(...args: any[]) => any} TFunc

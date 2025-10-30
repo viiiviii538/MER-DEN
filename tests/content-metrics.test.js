@@ -66,7 +66,7 @@ describe('content-metrics', () => {
 
     test('detects sold badge via querySelector', () => {
       const el = document.createElement('div');
-      el.innerHTML = '<img alt="SOLD badge" />';
+      el.innerHTML = '<img alt="SOLD badge"/>';
       expect(isSold(el)).toBe(true);
     });
 
