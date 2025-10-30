@@ -8,7 +8,7 @@ test.describe('MerSearch Helper overlay smoke test', () => {
     const likesById: Record<string, number> = {
       m0001: 45,
       m0002: 3,
-      m0003: 0,
+      m0003: 0
     };
 
     const searchPageHtml = `<!DOCTYPE html>
@@ -82,8 +82,8 @@ test.describe('MerSearch Helper overlay smoke test', () => {
       headless: false,
       args: [
         `--disable-extensions-except=${extensionPath}`,
-        `--load-extension=${extensionPath}`,
-      ],
+        `--load-extension=${extensionPath}`
+      ]
     });
 
     const collectDebug = async () => {
@@ -102,8 +102,8 @@ test.describe('MerSearch Helper overlay smoke test', () => {
             position: computed.position,
             top: computed.top,
             left: computed.left,
-            width: computed.width,
-          },
+            width: computed.width
+          }
         };
       });
       badgeDebug = await page.evaluate(() => {
@@ -113,7 +113,7 @@ test.describe('MerSearch Helper overlay smoke test', () => {
           return {
             id: anchor.getAttribute('data-item-id'),
             badge: badge?.textContent,
-            badgeHTML: badge?.outerHTML,
+            badgeHTML: badge?.outerHTML
           };
         });
       });
@@ -126,14 +126,14 @@ test.describe('MerSearch Helper overlay smoke test', () => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json; charset=utf-8',
-          body: JSON.stringify({ ok: true, active: true }),
+          body: JSON.stringify({ ok: true, active: true })
         });
       });
       await context.route('https://script.googleusercontent.com/**', async (route) => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json; charset=utf-8',
-          body: JSON.stringify({ ok: true, active: true }),
+          body: JSON.stringify({ ok: true, active: true })
         });
       });
       const fulfillDetail = async (route: import('@playwright/test').Route) => {
@@ -144,7 +144,7 @@ test.describe('MerSearch Helper overlay smoke test', () => {
         await route.fulfill({
           status: 200,
           contentType: 'text/html; charset=utf-8',
-          body: detailPageFor(id, likes),
+          body: detailPageFor(id, likes)
         });
       };
       await context.route('https://jp.mercari.com/item/**', fulfillDetail);
@@ -153,7 +153,7 @@ test.describe('MerSearch Helper overlay smoke test', () => {
         await route.fulfill({
           status: 200,
           contentType: 'text/html; charset=utf-8',
-          body: searchPageHtml,
+          body: searchPageHtml
         });
       });
 
@@ -180,7 +180,7 @@ test.describe('MerSearch Helper overlay smoke test', () => {
         Object.defineProperty(Date, 'now', {
           configurable: true,
           writable: true,
-          value: () => fixedNow,
+          value: () => fixedNow
         });
         const stub = (0, eval)(stubSource) as typeof stubRandom;
         stub(randomValues);
@@ -188,7 +188,7 @@ test.describe('MerSearch Helper overlay smoke test', () => {
         Object.defineProperty(performance, 'now', {
           configurable: true,
           writable: true,
-          value: () => 500 + perfCalls++ * 7,
+          value: () => 500 + perfCalls++ * 7
         });
       }, { randomValues: [0.19, 0.23, 0.41, 0.59], stubSource: stubRandomSource });
       page.on('console', (msg) => {
@@ -208,7 +208,7 @@ test.describe('MerSearch Helper overlay smoke test', () => {
         '出品中：2',
         '売り切れ：1',
         'レンジ(全件)：¥800〜¥3,400',
-        '取得：3件',
+        '取得：3件'
       ]);
 
       const badgeFor = (id: string) => page.locator(`a[data-item-id="${id}"] .mer-badge`);
@@ -224,19 +224,19 @@ test.describe('MerSearch Helper overlay smoke test', () => {
         if (consoleLogs.length) {
           await testInfo.attach('page-console.json', {
             body: JSON.stringify(consoleLogs, null, 2),
-            contentType: 'application/json',
+            contentType: 'application/json'
           });
         }
         if (overlayDebug) {
           await testInfo.attach('overlay-state.json', {
             body: JSON.stringify(overlayDebug, null, 2),
-            contentType: 'application/json',
+            contentType: 'application/json'
           });
         }
         if (badgeDebug) {
           await testInfo.attach('badge-state.json', {
             body: JSON.stringify(badgeDebug, null, 2),
-            contentType: 'application/json',
+            contentType: 'application/json'
           });
         }
       }
