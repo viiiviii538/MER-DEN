@@ -13,24 +13,24 @@
  */
 const metrics = require('../../../content-metrics.js');
 
+// Jest の設定は package.json 内で完結しており、<rootDir> = プロジェクト直下のままです。
+// そのため '../../../content-metrics.js' の require がそのまま動作することを確認しておき、
+// 後続 PR で実装者が import 設定に悩まず済むようにメモしています。
 const { isSold } = metrics;
 
 describe('isSold', () => {
-  describe('正常', () => {
-    it('売り切れ表記を持つケースを判定できる', () => {
-      // TODO: 仕様確定後に実装
-    });
+  it('normal', () => {
+    // TODO: 「売り切れ」表記が含まれる要素で true になることを確認する
   });
 
-  describe('境界', () => {
-    it('英語と日本語が混在する境界ケースを扱える', () => {
-      // TODO: 仕様確定後に実装
-    });
+  it('edge', () => {
+    // TODO: 英語表記や aria-label で判定する境界ケースを想定する
   });
 
-  describe('異常', () => {
-    it('HTMLElement 以外が入力された場合は例外を想定する', () => {
-      // TODO: expect(() => isSold({})).toThrow();
-    });
+  it('invalid', () => {
+    // TODO: プレーンオブジェクトや数値が渡ったときに例外を投げることを確認する
   });
 });
+
+// 高校生向けレビュー: 商品札に「売切」や SOLD と書いてあれば「もう無いよ」と判断し、
+// 関係ないものを渡されたら「それは商品札じゃない」と突き返す練習です。

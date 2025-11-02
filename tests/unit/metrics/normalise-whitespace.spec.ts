@@ -13,24 +13,23 @@
  */
 const metrics = require('../../../content-metrics.js');
 
+// Jest の解決ルールは package.json の通りで、追加の moduleNameMapper などは不要です。
+// そのため '../../../content-metrics.js' の require でユニットテストを組み立てられることを確認し、
+// 後続 PR でこの雛形を発展させやすいようコメントを残しています。
 const { normaliseWhitespace } = metrics._internals;
 
 describe('normaliseWhitespace', () => {
-  describe('正常', () => {
-    it('通常の文章内の余分な空白を整形できる', () => {
-      // TODO: 仕様確定後に実装
-    });
+  it('normal', () => {
+    // TODO: 改行や複数スペースを含む文章が 1 行に整うことを確認する
   });
 
-  describe('境界', () => {
-    it('空文字や半角スペースのみのケースを扱える', () => {
-      // TODO: 仕様確定後に実装
-    });
+  it('edge', () => {
+    // TODO: 空文字・タブのみなどの境界入力でも期待通りに処理されることを確認する
   });
 
-  describe('異常', () => {
-    it('文字列以外の入力に対して例外が投げられる', () => {
-      // TODO: expect(() => normaliseWhitespace(null)).toThrow();
-    });
+  it('invalid', () => {
+    // TODO: 文字列以外の入力では例外が投げられることを確認する
   });
 });
+
+// 高校生向けレビュー: レポート原稿の余分なスペースや改行を先生に提出する前に整える練習です。
