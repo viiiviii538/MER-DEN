@@ -13,7 +13,7 @@ export interface KillSwitchGateway {
    * 現在の停止スイッチ状態を取得します。
    *
    * @returns スイッチが有効であれば 'active'、無効であれば 'inactive' を Promise で返します。
-   * @throws Error - ネットワーク障害や設定ファイルの破損などで状態が読み出せない場合に発生します。
+   * @throws Error - ネットワーク障害、応答のタイムアウト、設定ファイルの破損などで状態が読み出せない場合に発生します。
    */
   fetchStatus(): Promise<KillSwitchStatus>;
 
@@ -22,7 +22,7 @@ export interface KillSwitchGateway {
    *
    * @param status - 新しく適用したい状態。'active' を指定すれば機能が停止し、'inactive' で再開します。
    * @returns 操作が成功したことを示す Promise が返ります。
-   * @throws Error - 書き込み権限が不足している、または競合が発生した場合に失敗します。
+   * @throws Error - 書き込み権限が不足している、競合が発生した、または設定サービスの応答がタイムアウトした場合に失敗します。
    */
   updateStatus(status: KillSwitchStatus): Promise<void>;
 }

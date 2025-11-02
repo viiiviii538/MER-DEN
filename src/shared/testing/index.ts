@@ -8,7 +8,7 @@ export interface TestDoubleFactory<TDependency> {
    *
    * @param overrides - 個別に変更したい振る舞い。必要な部分だけを指定することを想定しています。
    * @returns テストで利用できる依存オブジェクトを返します。
-   * @throws Error - 必須プロパティが欠けており、テストダブルを組み立てられない場合に発生します。
+   * @throws Error - 必須プロパティが欠けており、テストダブルを組み立てられない場合、または与えたオーバーライドが無効な値を含んでいた場合に発生します。
    */
   create(overrides?: Partial<TDependency>): TDependency;
 }

@@ -8,7 +8,7 @@ export interface UseCase<Request, Response> {
    *
    * @param request - 入力データ。フォームの内容や API からの値などをまとめて渡します。
    * @returns 処理結果を Promise で返します。成功時には Response 型の値が含まれます。
-   * @throws Error - 前提条件を満たしていない、外部サービスが失敗したなど、処理が進められない場合に発生します。
+   * @throws Error - 前提条件を満たしていない、外部サービスが失敗した、外部呼び出しがタイムアウトしたなど、処理が進められない場合に発生します。
    */
   execute(request: Request): Promise<Response>;
 }

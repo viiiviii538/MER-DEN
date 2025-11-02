@@ -29,7 +29,8 @@ export interface OverlayPresenter {
    *
    * @param summary - ドメイン層から渡される商品情報。未定義の値を渡すとエラーになる想定です。
    * @returns ビューモデルを含む Promise。同期的に計算できる場合でも Promise を返して統一します。
-   * @throws Error - データ形式が想定と異なる場合や、テンプレート生成に失敗した場合に発生します。
+   * @throws Error - データ形式が想定と異なる場合、テンプレート生成に失敗した場合、または描画準備がタイムアウトした場合に発生します。
+   * @remarks `summary` は `unknown` 型で受け取り、プレゼンター実装が型ガードを行うことを前提としています。
    */
   present(summary: unknown): Promise<OverlayViewModel>;
 }
