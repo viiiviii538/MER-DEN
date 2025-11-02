@@ -14,24 +14,24 @@
  */
 const metrics = require('../../../content-metrics.js');
 
+// Jest は package.json の設定で <rootDir> がプロジェクト直下に固定されているため、
+// '../../../content-metrics.js' という相対パスで CommonJS モジュールを正しく読み込めることを確認済みです。
+// 後続 PR では設定変更なしで実装を追加できる安全な足場になります。
 const { collectText } = metrics._internals;
 
 describe('collectText', () => {
-  describe('正常', () => {
-    it('基本的な要素からテキストを収集できる', () => {
-      // TODO: 仕様確定後に実装
-    });
+  it('normal', () => {
+    // TODO: 代表的な商品カードからテキストと属性を結合できることを検証する
   });
 
-  describe('境界', () => {
-    it('属性のみが存在する要素でも適切に結合できる', () => {
-      // TODO: 仕様確定後に実装
-    });
+  it('edge', () => {
+    // TODO: 属性のみが存在する境界ケースでも空文字にならないことを確認する
   });
 
-  describe('異常', () => {
-    it('HTMLElement 以外が来たときは例外を想定する', () => {
-      // TODO: expect(() => collectText(123)).toThrow();
-    });
+  it('invalid', () => {
+    // TODO: 数値など HTMLElement 以外の入力で安全に例外を投げることを確認する
   });
 });
+
+// 高校生向けレビュー: 商品カードの文章やタグをまとめてメモ帳に写す練習だと思って、
+// 変な入力が来たら「これは紙じゃないよ」と気付いて止めるイメージです。

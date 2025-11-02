@@ -13,24 +13,24 @@
  */
 const metrics = require('../../../content-metrics.js');
 
+// Jest の既定解決パスがプロジェクトルートに合っているため、
+// '../../../content-metrics.js' を require すれば追加設定なしで実行環境と一致します。
+// 後続 PR の実装者が import 設定に迷わず済むよう、ここで足場を明示しておきます。
 const { findTitleKey } = metrics;
 
 describe('findTitleKey', () => {
-  describe('正常', () => {
-    it('一般的なタイトルをキーワード化できる', () => {
-      // TODO: 仕様確定後に実装
-    });
+  it('normal', () => {
+    // TODO: 句読点やスペースを含む一般的なタイトルから検索キーを作る
   });
 
-  describe('境界', () => {
-    it('記号や半角全角の混在を処理できる', () => {
-      // TODO: 仕様確定後に実装
-    });
+  it('edge', () => {
+    // TODO: 絵文字や全角記号が混ざる境界ケースでも意図通りの結果になる
   });
 
-  describe('異常', () => {
-    it('要素が null などのときは例外を想定する', () => {
-      // TODO: expect(() => findTitleKey(undefined)).toThrow();
-    });
+  it('invalid', () => {
+    // TODO: undefined や数値が来た場合には例外を想定する
   });
 });
+
+// 高校生向けレビュー: 長いタイトルを単語カードに書き直して受験勉強するイメージで、
+// 記号だらけや読めないデータは「カードにできない」と判断する練習です。
