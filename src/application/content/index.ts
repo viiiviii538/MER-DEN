@@ -7,7 +7,7 @@ export interface ContentScript {
    * 拡張機能の表示準備を行い、必要な要素を配置します。
    *
    * @returns 準備が整ったことを示す Promise。成功時に追加の値は返しません。
-   * @throws Error - DOM へのアクセスが拒否された場合や必須データが取得できなかった場合に発生します。
+   * @throws Error - DOM へのアクセスが拒否された場合、必須データが取得できなかった場合、または初期データの取得がタイムアウトした場合に発生します。
    */
   initialize(): Promise<void>;
 
@@ -16,7 +16,8 @@ export interface ContentScript {
    *
    * @param summary - いいね情報など、描画に必要なデータ。null を渡すことは想定していません。
    * @returns 画面更新が完了したことを示す Promise。追加の戻り値は不要です。
-   * @throws Error - DOM 更新に失敗した場合やテンプレートが破損している場合に発生します。
+   * @throws Error - DOM 更新に失敗した場合、テンプレートが破損している場合、またはリモートデータの取得がタイムアウトした場合に発生します。
+   * @remarks `summary` は `unknown` 型で受け取り、実装側で型ガードを実行してから利用する前提です。
    */
   render(summary: unknown): Promise<void>;
 }

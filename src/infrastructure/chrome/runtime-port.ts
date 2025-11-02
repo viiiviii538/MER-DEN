@@ -15,7 +15,7 @@ export interface RuntimePort<Message> {
    * 外部から届いたメッセージを購読するためのイベントハンドラーを登録します。
    *
    * @param listener - 受信時に呼び出される関数。未定義のメッセージを受け取った場合は実装側で安全に扱ってください。
-   * @throws Error - リスナー登録に失敗した場合や、ポートがすでに切断されている場合に発生します。
+   * @throws Error - リスナー登録に失敗した場合、ポートがすでに切断されている場合、またはメッセージ検証ができず無効データとして扱った場合に発生します。
    */
   addListener(listener: (message: Message) => void): void;
 

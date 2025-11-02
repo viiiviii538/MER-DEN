@@ -13,7 +13,7 @@ export interface BackgroundTask {
    * タスクが準備できているかを判定する非同期チェックです。
    *
    * @returns 実行可能なら true、待つ必要があれば false を返します。
-   * @throws Error - 必須設定が取得できないなど、状態確認に失敗した場合に発生します。
+   * @throws Error - 必須設定が取得できない、設定読み込みがタイムアウトしたなど、状態確認に失敗した場合に発生します。
    */
   canRun(): Promise<boolean>;
 
@@ -21,7 +21,7 @@ export interface BackgroundTask {
    * タスク本体を実行するためのメソッドです。
    *
    * @returns 完了を表す Promise。成功時に追加の戻り値はありません。
-   * @throws Error - ネットワークタイムアウトや権限不足により処理が完結しない場合に発生します。
+   * @throws Error - ネットワークタイムアウトや権限不足、前準備の無効データ検出により処理が完結しない場合に発生します。
    */
   run(): Promise<void>;
 }

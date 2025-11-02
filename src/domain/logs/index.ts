@@ -23,6 +23,7 @@ export interface LogRecord {
   /**
    * 追加情報が必要な場合に使用する自由形式のメタデータです。
    * JSON 化可能な値に限定し、実装側で null を使って未設定を表現しても構いません。
+   * `unknown` 型で表現しているため、読み出すときは型ガードで安全性を確認する前提です。
    */
   readonly metadata?: Record<string, unknown>;
 }
@@ -37,7 +38,7 @@ export interface LogWriter {
    *
    * @param record - 記録したい情報。timestamp や level が欠けた状態は想定していません。
    * @returns 転送が完了したことを示す Promise。成功時は特別な値を返しません。
-   * @throws Error - ネットワーク障害や容量制限でログを保存できなかった場合に発生します。
+   * @throws Error - ネットワーク障害や容量制限でログを保存できなかった場合、送信先がタイムアウトした場合に発生します。
    */
   write(record: LogRecord): Promise<void>;
 }

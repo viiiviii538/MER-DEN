@@ -32,7 +32,7 @@ export interface LikesRepository {
    *
    * @param listingId - 情報を集めたい商品 ID。空文字や null を渡すことは許容されません。
    * @returns 商品 ID・いいね数・取得時刻を含む情報が Promise で返ります。
-   * @throws Error - ネットワーク断やアクセス制限などで取得できない場合に発生します。
+   * @throws Error - ネットワーク断やアクセス制限、レスポンスがタイムアウトした場合、または取得したデータが無効な場合に発生します。
    */
   fetchByListingId(listingId: string): Promise<LikeSummary>;
 
@@ -41,7 +41,7 @@ export interface LikesRepository {
    *
    * @param summary - 保存対象となるいいね情報。listingId が一致しないものは受け付けません。
    * @returns 保存処理が完了したことを示す Promise が返ります。中身の値は必要ありません。
-   * @throws Error - 保存先の容量不足や権限不足で書き込みできなかった場合に発生します。
+   * @throws Error - 保存先の容量不足や権限不足、書き込み中のタイムアウト、または summary の整合性が取れない場合に発生します。
    */
   store(summary: LikeSummary): Promise<void>;
 }
