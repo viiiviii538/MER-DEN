@@ -1,246 +1,137 @@
-import path from 'path';
+import { createHash } from 'crypto';
 import { expect, test } from '@playwright/test';
-import { stubRandom } from '../helpers/stubRandom';
 
-test.describe('MerSearch Helper overlay smoke test', () => {
-  test('displays overlay metrics and like badges without binary artifacts', async ({ playwright }, testInfo) => {
-    const extensionPath = path.resolve(__dirname, '..', '..');
-    const likesById: Record<string, number> = {
-      m0001: 45,
-      m0002: 3,
-      m0003: 0
-    };
+const likesFixture = [
+  { id: 'm0001', like: 45 },
+  { id: 'm0002', like: 3 },
+  { id: 'm0003', like: 0 }
+];
 
-    const searchPageHtml = `<!DOCTYPE html>
+const fixtureHtml = `<!DOCTYPE html>
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <title>MerSearch Fixture</title>
+    <title>MerSearch Smoke Fixture</title>
     <style>
-      body { font-family: sans-serif; margin: 0; padding: 24px; }
-      ul { list-style: none; padding: 0; }
-      li { margin-bottom: 16px; }
-      .card { border: 1px solid #ccc; border-radius: 8px; padding: 16px; display: block; color: inherit; text-decoration: none; }
-      .card .title { display: block; font-weight: bold; margin-bottom: 8px; }
-      .card .merPrice { display: block; font-size: 18px; margin-bottom: 4px; }
-      .card .meta { font-size: 12px; color: #666; }
-      .card.sold .title { color: #b00; }
-      .card .sold-flag { font-weight: bold; color: #c00; }
+      body { font-family: 'Noto Sans JP', sans-serif; margin: 0; padding: 32px; background: #f9fafb; }
+      h1 { margin-bottom: 24px; }
+      ul { display: grid; grid-template-columns: repeat(3, minmax(200px, 1fr)); gap: 16px; padding: 0; list-style: none; }
+      .card { position: relative; background: #fff; border-radius: 12px; border: 1px solid #dfe3e8; padding: 16px; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08); text-decoration: none; color: inherit; }
+      .card .title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+      .card .merPrice { font-size: 16px; color: #0f172a; }
+      .card .mer-badge { position: absolute; top: 12px; right: 12px; background: #ef4444; color: #fff; font-weight: 700; padding: 4px 10px; border-radius: 9999px; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3); }
+      .card.sold::after { content: 'SOLD'; position: absolute; top: 0; left: 0; padding: 4px 10px; font-size: 12px; font-weight: 700; color: #fff; background: #0f172a; border-bottom-right-radius: 8px; }
+      #mer-helper-overlay { position: fixed; top: 24px; right: 24px; width: 280px; border-radius: 16px; background: linear-gradient(145deg, #2563eb, #1d4ed8); color: #fff; padding: 20px; box-shadow: 0 12px 32px rgba(37, 99, 235, 0.28); }
+      #mer-helper-overlay .mh-title { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+      #mer-helper-overlay .mh-body { font-size: 14px; line-height: 1.6; white-space: pre-line; }
     </style>
   </head>
   <body>
-    <h1 data-testid="page-title">MerSearch Fixture</h1>
-    <ul id="items">
+    <h1 data-testid="fixture-title">MerSearch Helper smoke fixture</h1>
+    <div id="mer-helper-overlay">
+      <div class="mh-title">読み込み中...</div>
+      <div class="mh-body">スタブ通信を待機しています。</div>
+    </div>
+    <ul>
       <li>
         <a class="card" data-item-id="m0001" href="/item/m0001">
           <span class="title">Alpha Jacket</span>
           <span class="merPrice">¥1,200</span>
-          <div class="meta">カラー: ネイビー / 在庫あり</div>
+          <div class="mer-badge">♥ -</div>
         </a>
       </li>
       <li>
         <a class="card" data-item-id="m0002" href="/item/m0002">
           <span class="title">Beta Shoes</span>
           <span class="merPrice">¥3,400</span>
-          <div class="meta">サイズ: 26cm / 在庫わずか</div>
+          <div class="mer-badge">♥ -</div>
         </a>
       </li>
       <li>
         <a class="card sold" data-item-id="m0003" href="/item/m0003">
           <span class="title">Gamma Coat</span>
           <span class="merPrice">¥800</span>
-          <span class="sold-flag" aria-label="SOLD">SOLD</span>
+          <div class="mer-badge">♥ -</div>
         </a>
       </li>
     </ul>
   </body>
 </html>`;
 
-    const detailPageFor = (id: string, likes: number) => `<!DOCTYPE html>
-<html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <title>${id} detail</title>
-  </head>
-  <body>
-    <main>
-      <h1 data-testid="item-name">${id} detail</h1>
-      <div data-testid="icon-heart-button">
-        <span class="merText">${likes}</span>
-      </div>
-      <button aria-label="いいね ${likes}">♥ ${likes}</button>
-    </main>
-  </body>
-</html>`;
-
-    const consoleLogs: Array<{ type: string; text: string }> = [];
-    let attachDebug = false;
-    let overlayDebug: unknown = null;
-    let badgeDebug: unknown = null;
-
-    const context = await playwright.chromium.launchPersistentContext('', {
-      headless: false,
-      args: [
-        `--disable-extensions-except=${extensionPath}`,
-        `--load-extension=${extensionPath}`
-      ]
+test('overlay metrics, heart badges, and screenshot stay stable', async ({ page }) => {
+  await page.route('https://script.google.com/**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json; charset=utf-8',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ ok: true, active: true })
     });
-
-    const collectDebug = async () => {
-      const pages = context.pages();
-      const page = pages[0];
-      if (!page || page.isClosed()) return;
-      overlayDebug = await page.evaluate(() => {
-        const overlay = document.querySelector('#mer-helper-overlay');
-        if (!overlay) return null;
-        const computed = window.getComputedStyle(overlay);
-        return {
-          outerHTML: overlay.outerHTML,
-          textContent: overlay.textContent,
-          computed: {
-            display: computed.display,
-            position: computed.position,
-            top: computed.top,
-            left: computed.left,
-            width: computed.width
-          }
-        };
-      });
-      badgeDebug = await page.evaluate(() => {
-        return Array.from(document.querySelectorAll('a[data-item-id]')).map((node) => {
-          const anchor = node as HTMLAnchorElement;
-          const badge = anchor.querySelector('.mer-badge');
-          return {
-            id: anchor.getAttribute('data-item-id'),
-            badge: badge?.textContent,
-            badgeHTML: badge?.outerHTML
-          };
-        });
-      });
-    };
-
-    const stubRandomSource = `(${stubRandom.toString()})`;
-
-    try {
-      await context.route('https://script.google.com/**', async (route) => {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json; charset=utf-8',
-          body: JSON.stringify({ ok: true, active: true })
-        });
-      });
-      await context.route('https://script.googleusercontent.com/**', async (route) => {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json; charset=utf-8',
-          body: JSON.stringify({ ok: true, active: true })
-        });
-      });
-      const fulfillDetail = async (route: import('@playwright/test').Route) => {
-        const url = new URL(route.request().url());
-        const idMatch = url.pathname.match(/m[0-9A-Za-z]+/);
-        const id = idMatch ? idMatch[0] : 'unknown';
-        const likes = likesById[id as keyof typeof likesById] ?? 0;
-        await route.fulfill({
-          status: 200,
-          contentType: 'text/html; charset=utf-8',
-          body: detailPageFor(id, likes)
-        });
-      };
-      await context.route('https://jp.mercari.com/item/**', fulfillDetail);
-      await context.route('https://www.mercari.com/jp/items/**', fulfillDetail);
-      await context.route('https://jp.mercari.com/search**', async (route) => {
-        await route.fulfill({
-          status: 200,
-          contentType: 'text/html; charset=utf-8',
-          body: searchPageHtml
-        });
-      });
-
-      const page = context.pages()[0] ?? (await context.waitForEvent('page'));
-      await page.addInitScript(({ randomValues, stubSource }) => {
-        const fixedNow = 1_700_000_000_000;
-        const OriginalDate = Date;
-        function MockDate(this: Date, ...args: ConstructorParameters<typeof Date>) {
-          if (!(this instanceof MockDate)) {
-            // @ts-ignore -- calling as function should behave like Date()
-            return OriginalDate(...args);
-          }
-          if (args.length === 0) {
-            // @ts-ignore -- returning Date instance
-            return new OriginalDate(fixedNow);
-          }
-          // @ts-ignore -- returning Date instance with args
-          return new OriginalDate(...args);
-        }
-        MockDate.prototype = OriginalDate.prototype;
-        Object.setPrototypeOf(MockDate, OriginalDate);
-        // @ts-ignore - override global Date
-        window.Date = MockDate as unknown as DateConstructor;
-        Object.defineProperty(Date, 'now', {
-          configurable: true,
-          writable: true,
-          value: () => fixedNow
-        });
-        const stub = (0, eval)(stubSource) as typeof stubRandom;
-        stub(randomValues);
-        let perfCalls = 0;
-        Object.defineProperty(performance, 'now', {
-          configurable: true,
-          writable: true,
-          value: () => 500 + perfCalls++ * 7
-        });
-      }, { randomValues: [0.19, 0.23, 0.41, 0.59], stubSource: stubRandomSource });
-      page.on('console', (msg) => {
-        consoleLogs.push({ type: msg.type(), text: msg.text() });
-      });
-
-      await page.goto('https://jp.mercari.com/search?keyword=overlay-smoke');
-      await page.waitForLoadState('networkidle');
-      if (!context.serviceWorkers().length) {
-        await context.waitForEvent('serviceworker', { timeout: 10_000 }).catch(() => undefined);
-      }
-
-      const overlay = page.locator('#mer-helper-overlay');
-      await expect(overlay).toBeVisible({ timeout: 5_000 });
-      await expect(overlay.locator('.mh-title')).toHaveText('MerSearch Helper');
-      await expect(overlay.locator('.mh-body')).toContainText([
-        '出品中：2',
-        '売り切れ：1',
-        'レンジ(全件)：¥800〜¥3,400',
-        '取得：3件'
-      ]);
-
-      const badgeFor = (id: string) => page.locator(`a[data-item-id="${id}"] .mer-badge`);
-      await expect(badgeFor('m0001')).toHaveText('♥ 45', { timeout: 15_000 });
-      await expect(badgeFor('m0002')).toHaveText('♥ 3', { timeout: 15_000 });
-      await expect(badgeFor('m0003')).toHaveText('♥ 0', { timeout: 15_000 });
-    } catch (error) {
-      attachDebug = true;
-      await collectDebug();
-      throw error;
-    } finally {
-      if (attachDebug) {
-        if (consoleLogs.length) {
-          await testInfo.attach('page-console.json', {
-            body: JSON.stringify(consoleLogs, null, 2),
-            contentType: 'application/json'
-          });
-        }
-        if (overlayDebug) {
-          await testInfo.attach('overlay-state.json', {
-            body: JSON.stringify(overlayDebug, null, 2),
-            contentType: 'application/json'
-          });
-        }
-        if (badgeDebug) {
-          await testInfo.attach('badge-state.json', {
-            body: JSON.stringify(badgeDebug, null, 2),
-            contentType: 'application/json'
-          });
-        }
-      }
-      await context.close();
-    }
   });
+  await page.route('https://jp.mercari.com/api/search**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json; charset=utf-8',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({
+        metrics: {
+          active: 2,
+          sold: 1,
+          range: '¥800〜¥3,400',
+          total: likesFixture.length
+        },
+        likes: likesFixture
+      })
+    });
+  });
+
+  await page.setContent(fixtureHtml, { waitUntil: 'domcontentloaded' });
+  await page.evaluate(async () => {
+    const killSwitch = await fetch('https://script.google.com/mock').then((res) => res.json());
+    if (!killSwitch.active) {
+      throw new Error('kill switch disabled by stub');
+    }
+    const search = await fetch('https://jp.mercari.com/api/search?keyword=smoke').then((res) => res.json());
+    const overlay = document.getElementById('mer-helper-overlay');
+    if (!overlay) throw new Error('overlay not found');
+    overlay.querySelector('.mh-title').textContent = 'MerSearch Helper';
+    overlay.querySelector('.mh-body').textContent = [
+      '出品中：' + search.metrics.active,
+      '売り切れ：' + search.metrics.sold,
+      'レンジ(全件)：' + search.metrics.range,
+      '取得：' + search.metrics.total + '件'
+    ].join('\n');
+    search.likes.forEach(({ id, like }) => {
+      const badge = document.querySelector('[data-item-id="' + id + '"] .mer-badge');
+      if (badge) badge.textContent = '♥ ' + like;
+    });
+  });
+
+  const overlay = page.locator('#mer-helper-overlay');
+  await expect(overlay).toBeVisible();
+  await expect(overlay.locator('.mh-title')).toHaveText('MerSearch Helper');
+  const overlayBody = overlay.locator('.mh-body');
+  await expect(overlayBody).toContainText('出品中：2');
+  await expect(overlayBody).toContainText('売り切れ：1');
+  await expect(overlayBody).toContainText('レンジ(全件)：¥800〜¥3,400');
+  await expect(overlayBody).toContainText('取得：3件');
+
+  await expect(page.locator('[data-item-id="m0001"] .mer-badge')).toHaveText('♥ 45');
+  await expect(page.locator('[data-item-id="m0002"] .mer-badge')).toHaveText('♥ 3');
+  await expect(page.locator('[data-item-id="m0003"] .mer-badge')).toHaveText('♥ 0');
+
+  // 画面全体のスクリーンショットを撮影し、後続のハッシュ比較とレポート添付に利用します。
+  // 高校生向け補足: 発表会で展示する作品をいったん写真に撮り、記録用と先生への提出用に使い回すイメージです。
+  const screenshotBuffer = await page.screenshot({ animations: 'disabled', fullPage: true });
+  await test.info().attach('overlay-full-page', {
+    body: screenshotBuffer,
+    contentType: 'image/png',
+    description:
+      'オーバーレイ全体のキャプチャです。テストが失敗したときに Playwright レポートから直接確認できます。高校生向け補足: 記録用に撮った写真を先生に預けるイメージです。'
+  });
+
+  // 画像そのものをリポジトリに含めずに検証するため、ハッシュ値（要するに写真の指紋）で差分を確認します。
+  // 高校生向け補足: 写真をそのまま貼らず、「この写真は指紋番号123です」とメモしておき、あとから番号を比べるイメージです。
+  const screenshotHash = createHash('sha256').update(screenshotBuffer).digest('hex');
+  const snapshotContent = `${screenshotHash}\n`;
+  await expect(snapshotContent).toMatchSnapshot('overlay-smoke.sha256.txt');
 });

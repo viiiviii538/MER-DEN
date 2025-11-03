@@ -8,8 +8,9 @@
     "build": "node build.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "e2e": "AGENT=1 npx playwright test --reporter=line --timeout=30000",
-    "e2e:ci": "AGENT=1 npx playwright test --reporter=junit,line --output=./.artifacts/e2e"
+    "e2e": "node ./tests/e2e/run-e2e.mjs",
+    "e2e:update": "node ./tests/e2e/run-e2e.mjs --update-snapshots",
+    "e2e:ci": "node ./tests/e2e/run-e2e.mjs --reporter=junit,line"
   },
   "repository": {
     "type": "git",
