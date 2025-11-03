@@ -23,6 +23,8 @@
   },
   "homepage": "https://github.com/viiiviii538/merkari-Tool#readme",
   "devDependencies": {
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-typescript": "^7.26.0",
     "@playwright/test": "^1.56.1",
     "@types/chrome": "^0.1.24",
     "@types/jest": "^30.0.0",
@@ -260,6 +262,19 @@
   "jest": {
     "testPathIgnorePatterns": [
       "<rootDir>/tests/e2e/"
+    ],
+    "transform": {
+      "^.+\\.[tj]s$": [
+        "babel-jest",
+        {
+          "configFile": "./babel.config.js"
+        }
+      ]
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
     ]
   }
 }
