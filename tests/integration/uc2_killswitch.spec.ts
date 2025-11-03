@@ -7,29 +7,42 @@
 // 後続 PR では `require('../../src/...')` の相対 import を追加するだけで結合テストを書けるため、
 // ここではその前提をコメントとして残しておきます。
 
-type RuntimePort = {
-  onMessage: (handler: (message: unknown) => Promise<unknown>) => void;
-  sendMessage: (message: unknown) => Promise<unknown>;
-};
+/**
+ * @typedef {Object} RuntimePort
+ * @property {(handler: (message: unknown) => Promise<unknown>) => void} onMessage
+ *   拡張機能の背景ページへメッセージを届ける際の「受け付け窓口」です。
+ * @property {(message: unknown) => Promise<unknown>} sendMessage
+ *   背景ページにリクエストを届ける宅配便の役割を果たします。
+ */
 
-type NetworkPort = {
-  fetchKillSwitchFromRemote: () => Promise<{ enabled: boolean }>;
-};
+/**
+ * @typedef {Object} NetworkPort
+ * @property {() => Promise<{ enabled: boolean }>} fetchKillSwitchFromRemote
+ *   リモート API へ問い合わせてキルスイッチの状態を取得します。
+ */
 
-type StoragePort = {
-  getCachedKillSwitch: () => { enabled: boolean; checkedAt: number } | null;
-  saveCachedKillSwitch: (snapshot: { enabled: boolean; checkedAt: number }) => void;
-  incrementFailure: () => number;
-  resetFailure: () => void;
-};
+/**
+ * @typedef {Object} StoragePort
+ * @property {() => { enabled: boolean, checkedAt: number } | null} getCachedKillSwitch
+ *   直近の問い合わせ結果を取り出します。高校生向けレビュー: 学級日誌を読み返すイメージです。
+ * @property {(snapshot: { enabled: boolean, checkedAt: number }) => void} saveCachedKillSwitch
+ *   取得した結果を保存して次回に備えます。
+ * @property {() => number} incrementFailure
+ *   連続失敗回数を数え上げます。
+ * @property {() => void} resetFailure
+ *   成功したら失敗回数をリセットします。
+ */
 
-type PopupPort = {
-  applyKillSwitchState: (enabled: boolean) => void;
-  showError: (message: string) => void;
-};
+/**
+ * @typedef {Object} PopupPort
+ * @property {(enabled: boolean) => void} applyKillSwitchState
+ *   キルスイッチ状態をポップアップへ反映させます。
+ * @property {(message: string) => void} showError
+ *   失敗時に利用者へ丁寧なメッセージを伝えます。
+ */
 
-type KillSwitchSuccess = { ok: true; result: { enabled: boolean; source: 'cache' | 'remote' } };
-type KillSwitchFailure = { ok: false; error: string; result: { enabled: boolean; failures: number } };
+/** @typedef {{ ok: true, result: { enabled: boolean, source: 'cache' | 'remote' } }} KillSwitchSuccess */
+/** @typedef {{ ok: false, error: string, result: { enabled: boolean, failures: number } }} KillSwitchFailure */
 
 /**
  * 想定する JSON 応答の形:

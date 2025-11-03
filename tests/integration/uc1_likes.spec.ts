@@ -8,31 +8,45 @@
 // そのため後続 PR では `require('../../src/...')` のような相対パスで既存コードをそのまま読み込めることを確認済みで、
 // ここでは import 設定に手を入れずに済む足場であると明示しておきます。
 
-type RuntimePort = {
-  onMessage: (handler: (message: unknown) => Promise<unknown>) => void;
-  sendMessage: (message: unknown) => Promise<unknown>;
-};
+/**
+ * @typedef {Object} RuntimePort
+ * @property {(handler: (message: unknown) => Promise<unknown>) => void} onMessage
+ *   受け取ったメッセージを順番に処理するハンドラーを登録します。
+ * @property {(message: unknown) => Promise<unknown>} sendMessage
+ *   背景ページへ値を届ける小さな手紙係です。
+ */
 
-type NetworkPort = {
-  openLikeDetail: (url: string) => Promise<{ tabId: number }>;
-  waitForComplete: (tabId: number, timeoutMs: number) => Promise<boolean>;
-  readLikeCount: (tabId: number) => Promise<number>;
-  closeLikeDetail: (tabId: number) => Promise<void>;
-};
+/**
+ * @typedef {Object} NetworkPort
+ * @property {(url: string) => Promise<{ tabId: number }>} openLikeDetail
+ *   商品ページを新しいタブで開いて観測対象を用意します。
+ * @property {(tabId: number, timeoutMs: number) => Promise<boolean>} waitForComplete
+ *   指定タブの読み込み完了を見張ります。高校生向けレビュー: 先生の号令を待つイメージです。
+ * @property {(tabId: number) => Promise<number>} readLikeCount
+ *   表示された ♥ 数を読み取ります。
+ * @property {(tabId: number) => Promise<void>} closeLikeDetail
+ *   読み終わったタブを閉じて片付けます。
+ */
 
-type StoragePort = {
-  isKillSwitchEnabled: () => boolean;
-  recordLikeResult: (payload: { url: string; value: number }) => void;
-};
+/**
+ * @typedef {Object} StoragePort
+ * @property {() => boolean} isKillSwitchEnabled
+ *   安全のために一時停止中かどうかを返します。
+ * @property {(payload: { url: string, value: number }) => void} recordLikeResult
+ *   調査結果をノートに書き留めます。
+ */
 
-type PopupPort = {
-  updateBadgeText: (text: string) => void;
-  pushToast: (text: string) => void;
-};
+/**
+ * @typedef {Object} PopupPort
+ * @property {(text: string) => void} updateBadgeText
+ *   拡張機能のバッジに ♥ 数を表示します。
+ * @property {(text: string) => void} pushToast
+ *   画面右上に短いお知らせを出します。
+ */
 
-type BgScrapeLikeSuccess = { ok: true; value: number };
-type BgScrapeLikeDisabled = { ok: false; disabled: true };
-type BgScrapeLikeFailure = { ok: false; error: string; reason?: string };
+/** @typedef {{ ok: true, value: number }} BgScrapeLikeSuccess */
+/** @typedef {{ ok: false, disabled: true }} BgScrapeLikeDisabled */
+/** @typedef {{ ok: false, error: string, reason?: string }} BgScrapeLikeFailure */
 
 // TODO: RuntimePort・NetworkPort・StoragePort・PopupPort のモック生成関数を追加する
 // TODO: mountBackgroundLikeHandler を実装し、RuntimePort と各ポートの連携を再現する

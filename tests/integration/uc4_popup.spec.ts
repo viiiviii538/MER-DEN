@@ -1,55 +1,61 @@
 /**
- * UC4: Popup からの指示がコンテンツへ届く結合テスト雛形です。
- * キルスイッチ確認と overlay 切替の流れだけをモックで追う予定です。
+ * UC4: ポップアップ UI の表示制御を確認する結合テスト雛形です。
+ * 背景スクリプトとポップアップ間の通信を段階的に検証できるよう準備しています。
  */
 
-// Jest の設定は既存のままで十分であり、moduleNameMapper などを追加しなくても
-// `require('../../src/...')` の相対 import で後続 PR の実装を記述できることを確認済みです。
-// ここではその前提をコメントに残しておきます。
+// Jest のデフォルト設定（<rootDir> がプロジェクト直下）を利用しており、
+// 追加のトランスパイル設定なしで require を使えることを共有します。
 
-type RuntimePort = {
-  onMessage: (handler: (message: unknown) => Promise<unknown>) => void;
-  sendMessage: (message: unknown) => Promise<unknown>;
-};
+/**
+ * @typedef {Object} RuntimePort
+ * @property {(handler: (message: unknown) => Promise<unknown>) => void} onMessage
+ *   背景ページからポップアップへ届く通知を受け付けます。
+ * @property {(message: unknown) => Promise<unknown>} sendMessage
+ *   ポップアップから背景ページへリクエストを届ける手紙係です。
+ */
 
-type NetworkPort = {
-  sendToContent: (command: 'scan' | 'toggleOverlay') => Promise<{ ok: boolean }>;
-};
+/**
+ * @typedef {Object} PopupViewModel
+ * @property {string} keyword 現在の検索キーワード
+ * @property {number} likeCount 取得した ♥ 数
+ * @property {boolean} killSwitchEnabled キルスイッチの ON/OFF
+ */
 
-type StoragePort = {
-  waitForKillSwitchStatus: () => Promise<{ enabled: boolean }>;
-};
+/**
+ * @typedef {Object} PopupPort
+ * @property {(viewModel: PopupViewModel) => void} render
+ *   UI の状態を描画します。
+ * @property {(message: string) => void} showError
+ *   利用者へわかりやすいエラーを表示します。
+ */
 
-type PopupPort = {
-  markScanning: () => void;
-  showOverlay: () => void;
-  hideOverlay: () => void;
-};
+/**
+ * @typedef {Object} KillSwitchPort
+ * @property {() => Promise<boolean>} fetchKillSwitchState
+ *   現在のキルスイッチ状態を問い合わせます。
+ */
 
-type PopupSuccess = { ok: true };
-type PopupDisabled = { ok: false; disabled: true };
-type PopupFailure = { ok: false; error: string };
+/** @typedef {{ ok: true, viewModel: PopupViewModel }} PopupSuccess */
+/** @typedef {{ ok: false, error: string }} PopupFailure */
 
 /**
  * 想定する JSON 応答の形:
- * - 成功時: { ok: true }
- * - キルスイッチが無効: { ok: false, disabled: true }
- * - エラー時: { ok: false, error: string }
+ * - 成功時: { ok: true, viewModel: PopupViewModel }
+ * - 失敗時: { ok: false, error: string }
  */
 
-describe('UC4: Popup 操作（雛形）', () => {
+describe('UC4: popup 表示（雛形）', () => {
   it('normal', async () => {
-    // TODO: scan と toggleOverlay を順番に呼び出した際の成功応答を検証する
+    // TODO: render が呼ばれてバッジ情報が反映される正常ケースを検証する
   });
 
   it('edge', async () => {
-    // TODO: キルスイッチが無効だった場合に disabled 応答となる境界ケースを検証する
+    // TODO: killSwitchEnabled が true のときに警告表示が出る境界ケースを検証する
   });
 
   it('invalid', async () => {
-    // TODO: 未知のコマンドや sendToContent の失敗に対するエラー処理を検証する
+    // TODO: fetchKillSwitchState が失敗した場合に showError が呼ばれることを検証する
   });
 });
 
-// 高校生向けレビュー: 部室から「今から掃除開始！」と連絡するとき、
-// 顧問の許可を確かめ、ダメなら「今日は中止」と全員へ伝える流れを再現する計画です。
+// 高校生向けレビュー: 文化祭の案内板を作る係が、倉庫係（背景処理）と連絡を取りながら表示内容を更新する練習です。

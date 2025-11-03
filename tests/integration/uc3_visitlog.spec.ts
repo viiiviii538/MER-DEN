@@ -1,53 +1,63 @@
 /**
- * UC3: 取引ログ送信の結合テスト雛形です。
- * 送信の重複判定と失敗時の即エラー化ルールをモックで確認する予定です。
+ * UC3: 検索履歴をポップアップへ表示する結合テストの雛形です。
+ * 後続タスクでは visit log API とローカル保存の連携を検証します。
  */
 
-// Jest の import 解決は既存の相対パスで十分なことを確認しました。
-// 後続 PR では `require('../../src/...')` を追加するだけで動作するため、
-// 設定変更が不要である点をコメントして開発の足場を共有します。
+// Jest 設定はデフォルトのままで、<rootDir> 直下にあるファイルへ相対パスでアクセスできます。
+// ここでは設定変更が不要である点をコメントして開発の足場を共有します。
 
-type RuntimePort = {
-  onMessage: (handler: (message: unknown) => Promise<unknown>) => void;
-  sendMessage: (message: unknown) => Promise<unknown>;
-};
+/**
+ * @typedef {Object} RuntimePort
+ * @property {(handler: (message: unknown) => Promise<unknown>) => void} onMessage
+ *   ポップアップから届く「新しい検索結果を見せて」の声を受け止めます。
+ * @property {(message: unknown) => Promise<unknown>} sendMessage
+ *   背景ページへ指示を届ける連絡係です。
+ */
 
-type NetworkPort = {
-  postVisitLog: (entry: { signature: string; payload: unknown }) => Promise<{ ok: boolean; deduped?: boolean; error?: string }>;
-};
+/**
+ * @typedef {Object} VisitLogEntry
+ * @property {string} keyword 検索キーワード
+ * @property {number} visitedAt 検索した時間（UNIX 時間）
+ */
 
-type StoragePort = {
-  getLastSignature: () => { signature: string; timestamp: number } | null;
-  saveLastSignature: (entry: { signature: string; timestamp: number }) => void;
-};
+/**
+ * @typedef {Object} VisitLogPort
+ * @property {() => Promise<VisitLogEntry[]>} loadRecentKeywords
+ *   保存済みの検索履歴を取得します。
+ * @property {(entry: VisitLogEntry) => Promise<void>} saveKeyword
+ *   新しい検索結果を保存します。
+ */
 
-type PopupPort = {
-  notifySuccess: (message: string) => void;
-  notifyFailure: (message: string) => void;
-};
+/**
+ * @typedef {Object} PopupPort
+ * @property {(entries: VisitLogEntry[]) => void} renderVisitLog
+ *   取得した履歴をリスト表示します。
+ * @property {(message: string) => void} showEmptyNotice
+ *   履歴が無い場合に励ましのメッセージを表示します。
+ */
 
-type VisitLogSuccess = { ok: true; deduped: boolean };
-type VisitLogFailure = { ok: false; error: string };
+/** @typedef {{ ok: true, keywords: VisitLogEntry[] }} VisitLogSuccess */
+/** @typedef {{ ok: false, error: string }} VisitLogFailure */
 
 /**
  * 想定する JSON 応答の形:
- * - 成功時: { ok: true, deduped: boolean }
+ * - 成功時: { ok: true, keywords: VisitLogEntry[] }
  * - 失敗時: { ok: false, error: string }
  */
 
-describe('UC3: Visit log 送信（雛形）', () => {
+describe('UC3: visit log 取得（雛形）', () => {
   it('normal', async () => {
-    // TODO: 初回送信で postVisitLog が呼ばれ、成功レスポンスになるシナリオを検証する
+    // TODO: visit log が存在するときに renderVisitLog が呼ばれることを検証する
   });
 
   it('edge', async () => {
-    // TODO: 直近署名と一致する場合に deduped:true で早期終了するシナリオを検証する
+    // TODO: 履歴が空のときに showEmptyNotice が呼ばれることを検証する
   });
 
   it('invalid', async () => {
-    // TODO: postVisitLog がエラー応答を返した場合のエラーハンドリングを検証する
+    // TODO: loadRecentKeywords が失敗した場合にエラー応答を返すことを検証する
   });
 });
 
-// 高校生向けレビュー: 同じ提出物は 1 回だけ出し、先生が受け取れなかったらすぐ報告する、
-// そんな真面目な提出ルールをテストで表現する練習です。
+// 高校生向けレビュー: みんなの図書室利用記録をまとめて掲示板に貼り出し、
+// 本が借りられていないときは「次に借りる人募集中！」と声をかけるイメージです。
