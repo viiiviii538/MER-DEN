@@ -496,18 +496,42 @@ const merHelperContentGlobal = typeof self !== 'undefined'
     if (!msg || msg.scope !== 'mer-helper') return;
     (async () => {
       try {
-        if (msg.type === 'ping') { sendResponse({ ok: true, result: 'pong' }); return; }
+        if (msg.type === 'ping') {
+          sendResponse({ ok: true, result: 'pong' });
+          return;
+        }
+
         if (!killSwitchReady) {
           const status = await waitForKillSwitchStatus({ attempts: 1 });
           applyKillSwitchState(status.enabled);
         }
+
         if (!killSwitchEnabled) {
           sendResponse({ ok: false, disabled: true });
           return;
         }
-        if (msg.type === 'toggleOverlay') { toggleOverlay(); sendResponse({ ok: true, result: true }); return; }
-        if (msg.type === 'scan') { const r = await scan(msg.payload || {}); sendResponse({ ok: true, result: r }); return; }
-        sendResponse({ ok: false, error: 'unknown type' });
+
+        /**
+         * メッセージ種別ごとの分岐を 1 か所にまとめ、
+         * どのイベントでどの処理が呼ばれるのかを初心者でも追えるようにしています。
+         */
+        switch (msg.type) {
+          case 'toggleOverlay': {
+            toggleOverlay();
+            sendResponse({ ok: true, result: true });
+            break;
+          }
+          case 'scan': {
+            const payload = typeof msg === 'object' && msg && 'payload' in msg
+              ? /** @type {{ payload?: any }} */ (msg).payload || {}
+              : {};
+            const result = await scan(payload);
+            sendResponse({ ok: true, result });
+            break;
+          }
+          default:
+            sendResponse({ ok: false, error: 'unknown type' });
+        }
       } catch (e) {
         sendResponse({ ok: false, error: String(e) });
       }
