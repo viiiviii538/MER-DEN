@@ -133,5 +133,8 @@ test('overlay metrics, heart badges, and screenshot stay stable', async ({ page 
   // 高校生向け補足: 写真をそのまま貼らず、「この写真は指紋番号123です」とメモしておき、あとから番号を比べるイメージです。
   const screenshotHash = createHash('sha256').update(screenshotBuffer).digest('hex');
   const snapshotContent = `${screenshotHash}\n`;
-  await expect(snapshotContent).toMatchSnapshot('overlay-smoke.sha256.txt');
+  // Playwright はスナップショット名に含まれるドットをダッシュへ置き換えるため、
+  // テンプレート上では hyphen 形式で保存されます。
+  // 高校生向け補足: フォルダー名に使えない記号があるとき、代わりに別の文字を貼り付ける感覚です。
+  await expect(snapshotContent).toMatchSnapshot('overlay-smoke-sha256.txt');
 });

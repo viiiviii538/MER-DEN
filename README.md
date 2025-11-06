@@ -1,5 +1,13 @@
 # MER-DEN
 
+## ビルドの流れ（エントリーポイントの TypeScript 化）
+
+- `npm run build:entrypoints` で `entrypoints/*.ts` をコンパイルし、`dist/entrypoints/*.js` を生成します。
+  - 高校生向け補足: Word で作った原稿を PDF に書き出すイメージで、「配布用に読みやすくした版」を作っています。
+- `npm run build` は上記コマンドを内部で実行するため、通常は `npm run build` だけで ZIP 化まで完了します。
+- CI やローカル開発で個別に動作確認したい場合は、`npm run lint` → `npm run typecheck` → `npm run test` → `npm run e2e` → `npm run build:entrypoints` → `npm run build` の順に実行すると迷いません。
+  - 高校生向け補足: テストで答案を確認してから清書→提出する、という段取りを並べています。
+
 ## E2E テスト (Playwright)
 
 - `npm run e2e` でローカルの E2E テストを実行できます。レポーターはテキストのみで、実行ログはコンソールに表示されます。

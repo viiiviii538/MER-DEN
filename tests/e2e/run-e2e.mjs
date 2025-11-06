@@ -4,18 +4,22 @@
  * Linux でディスプレイが無い場合は xvfb を噛ませ、Windows や macOS では素直に npx playwright を実行します。
  * 高校生向け補足: 画面が無いパソコンでは仮想画面を用意してブラウザを動かすイメージです。
  */
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { constants } from 'node:fs';
 import { access, readdir } from 'node:fs/promises';
-import { delimiter, join, relative } from 'node:path';
+import { delimiter, join, relative, resolve } from 'node:path';
+import { homedir } from 'node:os';
 import { env, exit, platform } from 'node:process';
 
+console.log('E2E スクリプトを開始しました。Chromium を確認します。');
 const extraArgs = process.argv.slice(2);
 const isWindows = platform === 'win32';
 const isLinux = platform === 'linux';
 const hasDisplay = Boolean(env.DISPLAY);
 
 const npxCommand = isWindows ? 'npx.cmd' : 'npx';
+await ensureChromiumBrowser();
+console.log('Chromium ブラウザの準備が完了しました。テストを開始します。');
 const { command, commandArgs, spawnEnv } = await preparePlaywrightCommand();
 
 const child = spawn(command, commandArgs, { stdio: 'inherit', env: spawnEnv });
@@ -78,6 +82,37 @@ async function preparePlaywrightCommand() {
     commandArgs: baseArgs,
     spawnEnv
   };
+}
+
+/**
+ * Chromium ブラウザが欠けているとテストが即座に失敗するため、事前にインストールを強制します。
+ * 高校生向け補足: テスト前に「ブラウザという道具」を用意しておかないと授業が始められない、という段取りです。
+ */
+async function ensureChromiumBrowser() {
+  const chromiumExecutable = resolve(homedir(), '.cache', 'ms-playwright', 'chromium-1194', 'chrome-linux', 'chrome');
+
+  try {
+    await access(chromiumExecutable, constants.X_OK);
+    console.log('Chromium ブラウザは既に配置されています。');
+    return;
+  } catch {
+    console.log('Chromium ブラウザが見つからなかったため、Playwright 経由で取得します。');
+  }
+
+  const installProcess = spawnSync(npxCommand, ['playwright', 'install', 'chromium'], { stdio: 'inherit' });
+
+  if (installProcess.error) {
+    console.error('Chromium ブラウザのインストールに失敗しました。Playwright の実行環境を確認してください。');
+    console.error(installProcess.error);
+    console.error('高校生向け補足: 道具が届かなかったので授業が始められない、という状態です。ネットワーク設定などを見直してください。');
+    exit(1);
+  }
+
+  if ((installProcess.status ?? 0) !== 0) {
+    console.error(`Chromium ブラウザのインストールコマンドが終了コード ${(installProcess.status ?? 0)} で停止しました。`);
+    console.error('高校生向け補足: インストール途中で止まったので、指示通りにもう一度試すか、通信状況を確認してください。');
+    exit(installProcess.status ?? 1);
+  }
 }
 
 /**

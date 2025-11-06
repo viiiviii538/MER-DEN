@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/entrypoints",
+    "rootDir": "./entrypoints",
+    "allowJs": false,
+    "checkJs": false
+  },
+  "include": ["entrypoints/**/*.ts"]
+}
