@@ -19,7 +19,7 @@
         "https://script.googleusercontent.com/*"
     ],
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "entrypoints/background.js"
     },
     "content_scripts": [
         {
@@ -28,7 +28,7 @@
             ],
             "js": [
                 "content-metrics.js",
-                "content.js"
+                "entrypoints/content.js"
             ],
             "css": [
                 "overlay.css"

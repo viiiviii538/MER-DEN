@@ -6,6 +6,7 @@
   "scripts": {
     "test": "jest",
     "build": "node build.js",
+    "build:entrypoints": "tsc --project tsconfig.entrypoints.json --noEmit false --declaration false",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "e2e": "node ./tests/e2e/run-e2e.mjs",
